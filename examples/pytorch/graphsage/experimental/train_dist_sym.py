@@ -213,9 +213,13 @@ def run(g, data):
 
     
 def main(graph, data):
-    print("Starting a run: ")
+    if args.rank == 0:
+        print("Starting a run: ")
     run(graph, data)
-    print("Run completed !!!")
+
+    dist.barrier()
+    if args.rank == 0:
+        print("Run completed !!!")
 
 
 def find_partition(nid, node_map):
@@ -285,16 +289,20 @@ if __name__ == '__main__':
     nc = args.world_size
 
     part_config = ""
+    #part_config = "/nfs_home/mvasimud/vertex_cut/vertexcuts_bcl/"
     if args.dataset == 'reddit':        
         part_config = os.path.join(part_config, "Libra_result_reddit", str(nc) + "Communities", "reddit.json")
     elif args.dataset == 'cora':
         part_config = os.path.join(part_config, "Libra_result_cora", str(nc) + "Communities","cora.json")
+    elif args.dataset == 'citeseer':
+        part_config = os.path.join(part_config, "Libra_result_citeseer", str(nc) + "Communities","citeseer.json")        
     elif args.dataset == 'pubmed':
-        part_config = os.path.join(part_config, "Libra_result_pubmed/", str(nc) + "Communities", "pubmed.json")
+        part_config = os.path.join(part_config, "Libra_result_pubmed", str(nc) + "Communities", "pubmed.json")
     else:
         print("Error: Dataset not found !!!")
         sys.exit(1)
 
+    print("Dataset/partition location: ", part_config)
     with open(part_config) as conf_f:
         part_metadata = json.load(conf_f)
         
